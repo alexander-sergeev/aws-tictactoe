@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@aws-cdk/aws-cloudfront": "^1.87.1",
+    "@aws-cdk/aws-lambda": "^1.87.1",
     "@aws-cdk/aws-s3": "^1.87.1",
     "@aws-cdk/aws-s3-deployment": "^1.87.1",
     "@aws-cdk/core": "1.87.1",
