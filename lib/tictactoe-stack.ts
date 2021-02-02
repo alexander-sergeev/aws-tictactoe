@@ -8,7 +8,6 @@ export class TictactoeStack extends cdk.Stack {
     super(scope, id, props);
 
     const bucket = new Bucket(this, 'TictactoeBucket', {
-      websiteIndexDocument: 'index.html',
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     });
 
