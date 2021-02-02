@@ -36,7 +36,7 @@ export class TictactoeStack extends cdk.Stack {
       distribution,
     });
 
-    const code: lambda.Code = lambda.Code.fromAsset('src');
+    const code: lambda.Code = lambda.Code.fromAsset('dist');
 
     const helloWorldLambda: lambda.Function = new lambda.Function(this, 'HelloWorldHandler', {
       runtime: lambda.Runtime.NODEJS_12_X,
