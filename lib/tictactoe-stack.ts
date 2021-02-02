@@ -3,6 +3,7 @@ import { BlockPublicAccess, Bucket } from '@aws-cdk/aws-s3';
 import * as s3deploy from '@aws-cdk/aws-s3-deployment';
 import { CloudFrontWebDistribution, OriginAccessIdentity } from '@aws-cdk/aws-cloudfront';
 import * as lambda from '@aws-cdk/aws-lambda';
+import * as apiGateway from '@aws-cdk/aws-apigateway';
 
 export class TictactoeStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -38,6 +39,10 @@ export class TictactoeStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_12_X,
       code: lambda.Code.fromAsset('src'),
       handler: 'index.handler',
+    });
+
+    const helloWorldGateway = new apiGateway.LambdaRestApi(this, 'HelloWorldEndpoint', {
+      handler: helloWorldLambda,
     });
   }
 }
