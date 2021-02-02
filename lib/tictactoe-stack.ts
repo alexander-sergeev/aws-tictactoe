@@ -1,6 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import { Bucket } from '@aws-cdk/aws-s3';
 import * as s3deploy from '@aws-cdk/aws-s3-deployment';
+import { CloudFrontWebDistribution } from '@aws-cdk/aws-cloudfront';
 
 export class TictactoeStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -14,6 +15,17 @@ export class TictactoeStack extends cdk.Stack {
     new s3deploy.BucketDeployment(this, 'Deploy', {
       sources: [ s3deploy.Source.asset('./client') ],
       destinationBucket: bucket
+    });
+
+    const distribution = new CloudFrontWebDistribution(this, 'Distribution', {
+      originConfigs: [
+        {
+          s3OriginSource: {
+            s3BucketSource: bucket,
+          },
+          behaviors: [{ isDefaultBehavior: true }],
+        },
+      ]
     });
   }
 }
