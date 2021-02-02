@@ -11,11 +11,6 @@ export class TictactoeStack extends cdk.Stack {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     });
 
-    new s3deploy.BucketDeployment(this, 'Deploy', {
-      sources: [ s3deploy.Source.asset('./client') ],
-      destinationBucket: bucket
-    });
-
     const originAccessIdentity = new OriginAccessIdentity(this, 'OAI');
 
     bucket.grantRead(originAccessIdentity);
@@ -30,6 +25,12 @@ export class TictactoeStack extends cdk.Stack {
           behaviors: [{ isDefaultBehavior: true }],
         },
       ]
+    });
+
+    new s3deploy.BucketDeployment(this, 'Deploy', {
+      sources: [ s3deploy.Source.asset('./client') ],
+      destinationBucket: bucket,
+      distribution,
     });
   }
 }
