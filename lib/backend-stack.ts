@@ -3,9 +3,11 @@ import * as lambda from '@aws-cdk/aws-lambda';
 import * as gateway from '@aws-cdk/aws-apigateway';
 
 export class BackendStack extends cdk.Stack {
+  readonly restApi: gateway.LambdaRestApi;
+
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-    
+
     const code: lambda.Code = lambda.Code.fromAsset('dist');
 
     const helloWorldLambda: lambda.Function = new lambda.Function(this, 'HelloWorldHandler', {
@@ -17,5 +19,7 @@ export class BackendStack extends cdk.Stack {
     const helloWorldGateway: gateway.LambdaRestApi = new gateway.LambdaRestApi(this, 'HelloWorldEndpoint', {
       handler: helloWorldLambda,
     });
+
+    this.restApi = helloWorldGateway;
   }
 }

@@ -5,5 +5,10 @@ import { FrontendStack } from '../lib/frontend-stack';
 import { BackendStack } from '../lib/backend-stack';
 
 const app = new cdk.App();
-new FrontendStack(app, 'FrontendStack');
-new BackendStack(app, 'BackendStack');
+
+const backend = new BackendStack(app, 'BackendStack');
+const frontend = new FrontendStack(app, 'FrontendStack', {
+  restApi: backend.restApi,
+});
+
+frontend.addDependency(backend);
