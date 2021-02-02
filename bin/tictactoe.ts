@@ -8,7 +8,7 @@ const app = new cdk.App();
 
 const backend = new BackendStack(app, 'BackendStack');
 const frontend = new FrontendStack(app, 'FrontendStack', {
-  restApi: backend.restApi,
+  httpApi: backend.httpApi,
 });
 
 frontend.addDependency(backend);
