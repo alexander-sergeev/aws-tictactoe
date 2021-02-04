@@ -29,10 +29,9 @@ export class FrontendStack extends cdk.Stack {
 
     const backendOriginSource: cloudfront.CustomOriginConfig = {
       domainName: `${props.httpApi.httpApiId}.execute-api.${this.region}.${this.urlSuffix}`,
-      originPath: `/${props.httpApi.defaultStage}`,
     };
 
-    const backendBehavior: cloudfront.Behavior[] = [{ pathPattern: '/api' }];
+    const backendBehavior: cloudfront.Behavior[] = [{ pathPattern: '/api/*' }];
 
     const originConfigs: cloudfront.SourceConfiguration[] = [
       { s3OriginSource, behaviors: s3Behavior },

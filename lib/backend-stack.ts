@@ -24,7 +24,7 @@ export class BackendStack extends cdk.Stack {
     });
 
     api.addRoutes({
-      path: '/hello',
+      path: '/api/hello',
       methods: [ gateway.HttpMethod.GET ],
       integration: helloWorldLambdaIntegration,
     });
