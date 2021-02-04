@@ -6,7 +6,10 @@ import { BackendStack } from '../lib/backend-stack';
 
 const app = new cdk.App();
 
-const backend = new BackendStack(app, 'BackendStack');
+const backend = new BackendStack(app, 'BackendStack', {
+  authDomainPrefix: app.node.tryGetContext('authDomainPrefix'),
+  cloudfrontUrl: app.node.tryGetContext('cloudfrontUrl'),
+});
 const frontend = new FrontendStack(app, 'FrontendStack', {
   httpApi: backend.httpApi,
 });
