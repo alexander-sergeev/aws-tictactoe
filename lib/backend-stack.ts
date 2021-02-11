@@ -31,11 +31,13 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    userPool.addDomain('AuthDomain', {
+    const authDomain = userPool.addDomain('AuthDomain', {
       cognitoDomain: {
         domainPrefix: props.authDomainPrefix,
       },
     });
+
+    const authCallbackUrl = props.cloudfrontUrl;
 
     const authClient: cognito.UserPoolClient = new cognito.UserPoolClient(this, 'AuthClient', {
       userPool,
@@ -44,9 +46,13 @@ export class BackendStack extends cdk.Stack {
           authorizationCodeGrant: true,
         },
         scopes: [cognito.OAuthScope.OPENID],
-        callbackUrls: [props.cloudfrontUrl],
+        callbackUrls: [authCallbackUrl],
         logoutUrls: [props.cloudfrontUrl],
       }
+    });
+
+    const authSignInUrl = authDomain.signInUrl(authClient, {
+      redirectUri: authCallbackUrl,
     });
 
     const code: lambda.Code = lambda.Code.fromAsset('dist');
@@ -67,6 +73,25 @@ export class BackendStack extends cdk.Stack {
       path: '/api/hello',
       methods: [ gateway.HttpMethod.GET ],
       integration: helloWorldLambdaIntegration,
+    });
+
+    const loginRedirectLambda: lambda.Function = new lambda.Function(this, 'LoginRedirectLambda', {
+      runtime: lambda.Runtime.NODEJS_12_X,
+      code: lambda.Code.fromAsset('dist/login-redirect'),
+      handler: 'index.handler',
+      environment: {
+        SIGN_IN_URL: authSignInUrl,
+      },
+    });
+
+    const loginRedirectLambdaIntegration = new apiIntegrations.LambdaProxyIntegration({
+      handler: loginRedirectLambda,
+    });
+
+    api.addRoutes({
+      path: '/login',
+      methods: [ gateway.HttpMethod.GET ],
+      integration: loginRedirectLambdaIntegration,
     });
 
     this.httpApi = api;

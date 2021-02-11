@@ -30,7 +30,10 @@ export class FrontendStack extends cdk.Stack {
       domainName: `${props.httpApiId}.execute-api.${this.region}.${this.urlSuffix}`,
     };
 
-    const backendBehavior: cloudfront.Behavior[] = [{ pathPattern: '/api/*' }];
+    const backendBehavior: cloudfront.Behavior[] = [
+      { pathPattern: '/api/*' }, 
+      { pathPattern: '/login' },
+    ];
 
     const originConfigs: cloudfront.SourceConfiguration[] = [
       { s3OriginSource, behaviors: s3Behavior },
