@@ -31,8 +31,8 @@ export class FrontendStack extends cdk.Stack {
     };
 
     const backendBehavior: cloudfront.Behavior[] = [
-      { pathPattern: '/api/*' }, 
-      { pathPattern: '/login' },
+      { pathPattern: '/api/*', defaultTtl: cdk.Duration.seconds(0) }, 
+      { pathPattern: '/login', defaultTtl: cdk.Duration.seconds(0) },
     ];
 
     const originConfigs: cloudfront.SourceConfiguration[] = [
