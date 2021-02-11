@@ -55,25 +55,7 @@ export class BackendStack extends cdk.Stack {
       redirectUri: authCallbackUrl,
     });
 
-    const code: lambda.Code = lambda.Code.fromAsset('dist');
-
-    const helloWorldLambda: lambda.Function = new lambda.Function(this, 'HelloWorldHandler', {
-      runtime: lambda.Runtime.NODEJS_12_X,
-      code,
-      handler: 'index.handler',
-    });
-
     const api = new gateway.HttpApi(this, 'Api');
-
-    const helloWorldLambdaIntegration = new apiIntegrations.LambdaProxyIntegration({
-      handler: helloWorldLambda,
-    });
-
-    api.addRoutes({
-      path: '/api/hello',
-      methods: [ gateway.HttpMethod.GET ],
-      integration: helloWorldLambdaIntegration,
-    });
 
     const loginRedirectLambda: lambda.Function = new lambda.Function(this, 'LoginRedirectLambda', {
       runtime: lambda.Runtime.NODEJS_12_X,
