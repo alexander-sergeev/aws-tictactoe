@@ -11,7 +11,7 @@ const backend = new BackendStack(app, 'BackendStack', {
   cloudfrontUrl: app.node.tryGetContext('cloudfrontUrl'),
 });
 const frontend = new FrontendStack(app, 'FrontendStack', {
-  httpApi: backend.httpApi,
+  httpApiId: backend.httpApi.httpApiId,
 });
 
 frontend.addDependency(backend);

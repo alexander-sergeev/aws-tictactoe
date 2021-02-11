@@ -2,10 +2,9 @@ import * as cdk from '@aws-cdk/core';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as s3deploy from '@aws-cdk/aws-s3-deployment';
 import * as cloudfront from '@aws-cdk/aws-cloudfront';
-import * as gateway from '@aws-cdk/aws-apigatewayv2';
 
 export interface FrontendStackProps extends cdk.StackProps {
-  httpApi: gateway.HttpApi
+  httpApiId: string
 }
 
 export class FrontendStack extends cdk.Stack {
@@ -28,7 +27,7 @@ export class FrontendStack extends cdk.Stack {
     const s3Behavior: cloudfront.Behavior[] = [{ isDefaultBehavior: true }];
 
     const backendOriginSource: cloudfront.CustomOriginConfig = {
-      domainName: `${props.httpApi.httpApiId}.execute-api.${this.region}.${this.urlSuffix}`,
+      domainName: `${props.httpApiId}.execute-api.${this.region}.${this.urlSuffix}`,
     };
 
     const backendBehavior: cloudfront.Behavior[] = [{ pathPattern: '/api/*' }];
