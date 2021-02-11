@@ -40,9 +40,18 @@ export class FrontendStack extends cdk.Stack {
       { customOriginSource: backendOriginSource, behaviors: backendBehavior },
     ];
 
-    const distribution: cloudfront.CloudFrontWebDistribution = new cloudfront.CloudFrontWebDistribution(this, 'Distribution', {
-      originConfigs
-    });
+    const errorConfigurations: cloudfront.CfnDistribution.CustomErrorResponseProperty[] = [{
+      errorCode: 404,
+      responsePagePath: '/index.html',
+      responseCode: 200,
+    }];
+
+    const distributionConfig: cloudfront.CloudFrontWebDistributionProps = {
+      originConfigs,
+      errorConfigurations,
+    };
+
+    const distribution: cloudfront.CloudFrontWebDistribution = new cloudfront.CloudFrontWebDistribution(this, 'Distribution', distributionConfig);
 
     new s3deploy.BucketDeployment(this, 'Deploy', {
       sources: [s3deploy.Source.asset('./client/dist/client')],
