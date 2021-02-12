@@ -44,4 +44,8 @@ export class AuthService {
       },
     });
   }
+
+  async logout() {
+    this.oauth.logOut();
+  }
 }

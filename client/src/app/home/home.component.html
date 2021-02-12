@@ -1,0 +1,5 @@
+<div class="container px-3 pt-5">
+  <div class="display-1 font-weight-bold">tic tac toe</div>
+  <button *ngIf="!(isAuthenticated$ | async)" (click)="login()" class="btn btn-outline-primary btn-lg">Login</button>
+  <button *ngIf="(isAuthenticated$ | async)" (click)="logout()" class="btn btn-outline-primary btn-lg">Logout</button>
+</div>

@@ -6,11 +6,13 @@ import { OAuthModule } from 'angular-oauth2-oidc';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginCallbackComponent } from './login-callback/login-callback.component';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    LoginCallbackComponent
+    LoginCallbackComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
