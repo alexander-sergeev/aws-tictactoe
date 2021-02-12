@@ -38,11 +38,8 @@ export class AuthService {
 
   async proceedAuth() {
     await this.oauth.loadDiscoveryDocument(this.oauthDiscoveryUrl);
-    this.oauth.tryLoginCodeFlow({
-      onTokenReceived: () => {
-        this.router.navigate(['/']);
-      },
-    });
+    await this.oauth.tryLoginCodeFlow();
+    this.router.navigate(['/']);
   }
 
   async logout() {
