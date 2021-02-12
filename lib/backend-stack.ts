@@ -60,10 +60,6 @@ export class BackendStack extends cdk.Stack {
       }
     });
 
-    const authSignInUrl = authDomain.signInUrl(authClient, {
-      redirectUri: authCallbackUrl,
-    });
-
     const api = new gateway.HttpApi(this, 'Api');
 
     const authorizer = new gateway.CfnAuthorizer(this, 'ApiAuthorizer', {
@@ -75,25 +71,6 @@ export class BackendStack extends cdk.Stack {
         issuer: userPool.userPoolProviderUrl,
       },
       identitySource: ['$request.header.Authorization'],
-    });
-
-    const loginRedirectLambda: lambda.Function = new lambda.Function(this, 'LoginRedirectLambda', {
-      runtime: lambda.Runtime.NODEJS_12_X,
-      code: lambda.Code.fromAsset('dist/login-redirect'),
-      handler: 'index.handler',
-      environment: {
-        SIGN_IN_URL: authSignInUrl,
-      },
-    });
-
-    const loginRedirectLambdaIntegration = new apiIntegrations.LambdaProxyIntegration({
-      handler: loginRedirectLambda,
-    });
-
-    api.addRoutes({
-      path: '/login',
-      methods: [ gateway.HttpMethod.GET ],
-      integration: loginRedirectLambdaIntegration,
     });
 
     this.httpApi = api;
