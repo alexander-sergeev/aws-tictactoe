@@ -9,6 +9,15 @@ export interface BackendStackProps extends cdk.StackProps {
   cloudfrontUrl: string;
 }
 
+interface addRouteProps {
+  id: string;
+  api: gateway.HttpApi;
+  lambda: lambda.IFunction;
+  method?: gateway.HttpMethod;
+  path: string;
+  authorizer?: gateway.CfnAuthorizer;
+}
+
 export class BackendStack extends cdk.Stack {
   readonly httpApi: gateway.HttpApi;
 
@@ -89,4 +98,22 @@ export class BackendStack extends cdk.Stack {
 
     this.httpApi = api;
   }
+
+  private addRoute(props: addRouteProps) {
+    const integration = new apiIntegrations.LambdaProxyIntegration({
+      handler: props.lambda,
+    });
+    const routeProps: gateway.HttpRouteProps = {
+      httpApi: props.api,
+      routeKey: gateway.HttpRouteKey.with(props.path, props.method),
+      integration: integration,
+    };
+    const route = new gateway.HttpRoute(this, props.id, routeProps);
+    if (props.authorizer != null) {
+      const routeCfn = route.node.defaultChild as gateway.CfnRoute;
+      routeCfn.authorizationType = props.authorizer.authorizerType;
+      routeCfn.authorizerId = props.authorizer.ref;
+    }
+  }
+  
 }
