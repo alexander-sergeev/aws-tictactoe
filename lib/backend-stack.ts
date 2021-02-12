@@ -57,6 +57,17 @@ export class BackendStack extends cdk.Stack {
 
     const api = new gateway.HttpApi(this, 'Api');
 
+    const authorizer = new gateway.CfnAuthorizer(this, 'ApiAuthorizer', {
+      name: 'authorizer',
+      apiId: api.httpApiId,
+      authorizerType: 'JWT',
+      jwtConfiguration: {
+        audience: [authClient.userPoolClientId],
+        issuer: userPool.userPoolProviderUrl,
+      },
+      identitySource: ['$request.header.Authorization'],
+    });
+
     const loginRedirectLambda: lambda.Function = new lambda.Function(this, 'LoginRedirectLambda', {
       runtime: lambda.Runtime.NODEJS_12_X,
       code: lambda.Code.fromAsset('dist/login-redirect'),
