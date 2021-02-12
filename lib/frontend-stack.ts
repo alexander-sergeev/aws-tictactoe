@@ -31,6 +31,7 @@ export class FrontendStack extends cdk.Stack {
     
     const backendCachePolicy = new cloudfront.CachePolicy(this, 'BackendCachePolicy', {
       defaultTtl: cdk.Duration.seconds(0),
+      headerBehavior: cloudfront.CacheHeaderBehavior.allowList('Authorization'),
     });
 
     const backendBehavior: cloudfront.BehaviorOptions = {
