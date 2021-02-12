@@ -2,6 +2,7 @@ import * as cdk from '@aws-cdk/core';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as s3deploy from '@aws-cdk/aws-s3-deployment';
 import * as cloudfront from '@aws-cdk/aws-cloudfront';
+import * as cfOrigins from '@aws-cdk/aws-cloudfront-origins';
 
 export interface FrontendStackProps extends cdk.StackProps {
   httpApiId: string
@@ -15,43 +16,45 @@ export class FrontendStack extends cdk.Stack {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
     });
 
-    const originAccessIdentity: cloudfront.OriginAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'OAI');
+    const bucketOAI: cloudfront.OriginAccessIdentity = new cloudfront.OriginAccessIdentity(this, 'OAI');
 
-    bucket.grantRead(originAccessIdentity);
+    bucket.grantRead(bucketOAI);
 
-    const s3OriginSource: cloudfront.S3OriginConfig = {
-      s3BucketSource: bucket,
-      originAccessIdentity,
+    const bucketOriginProps: cfOrigins.S3OriginProps = { 
+      originAccessIdentity: bucketOAI 
     };
 
-    const s3Behavior: cloudfront.Behavior[] = [{ isDefaultBehavior: true }];
-
-    const backendOriginSource: cloudfront.CustomOriginConfig = {
-      domainName: `${props.httpApiId}.execute-api.${this.region}.${this.urlSuffix}`,
+    const defaultBehavior: cloudfront.BehaviorOptions = {
+      origin: new cfOrigins.S3Origin(bucket, bucketOriginProps),
+      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
     };
+    
+    const backendCachePolicy = new cloudfront.CachePolicy(this, 'BackendCachePolicy', {
+      defaultTtl: cdk.Duration.seconds(0),
+    });
 
-    const backendBehavior: cloudfront.Behavior[] = [
-      { pathPattern: '/api/*', defaultTtl: cdk.Duration.seconds(0) }, 
-      { pathPattern: '/login', defaultTtl: cdk.Duration.seconds(0) },
-    ];
-
-    const originConfigs: cloudfront.SourceConfiguration[] = [
-      { s3OriginSource, behaviors: s3Behavior },
-      { customOriginSource: backendOriginSource, behaviors: backendBehavior },
-    ];
-
-    const errorConfigurations: cloudfront.CfnDistribution.CustomErrorResponseProperty[] = [{
-      errorCode: 404,
+    const backendBehavior: cloudfront.BehaviorOptions = {
+      origin: new cfOrigins.HttpOrigin(`${props.httpApiId}.execute-api.${this.region}.${this.urlSuffix}`),
+      cachePolicy: backendCachePolicy,
+    };
+    
+    const errorResponses: cloudfront.ErrorResponse[] = [{
+      httpStatus: 404,
       responsePagePath: '/index.html',
-      responseCode: 200,
+      responseHttpStatus: 200,
     }];
 
-    const distributionConfig: cloudfront.CloudFrontWebDistributionProps = {
-      originConfigs,
-      errorConfigurations,
+    const distributionConfig: cloudfront.DistributionProps = {
+      defaultBehavior,
+      additionalBehaviors: {
+        '/api/*': backendBehavior,
+        '/login': backendBehavior,
+      },
+      defaultRootObject: 'index.html',
+      errorResponses,
     };
-
-    const distribution: cloudfront.CloudFrontWebDistribution = new cloudfront.CloudFrontWebDistribution(this, 'Distribution', distributionConfig);
+    
+    const distribution = new cloudfront.Distribution(this, 'Distribution', distributionConfig);
 
     new s3deploy.BucketDeployment(this, 'Deploy', {
       sources: [s3deploy.Source.asset('./client/dist/client')],
