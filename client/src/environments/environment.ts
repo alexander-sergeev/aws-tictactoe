@@ -3,7 +3,12 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  auth: {
+    oauthDiscoveryUrl: 'https://cognito-idp.eu-north-1.amazonaws.com/eu-north-1_ngrUIuuiv/.well-known/openid-configuration',
+    issuer: 'https://tictactoe-app-2021.auth.eu-north-1.amazoncognito.com',
+    clientId: '43uab7jk9kn3riq5s5curark2i',
+  },
 };
 
 /*

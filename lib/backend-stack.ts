@@ -37,7 +37,7 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    const authCallbackUrl = props.cloudfrontUrl;
+    const authCallbackUrl = props.cloudfrontUrl + '/login/callback';
 
     const authClient: cognito.UserPoolClient = new cognito.UserPoolClient(this, 'AuthClient', {
       userPool,
