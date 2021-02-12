@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { OAuthService } from 'angular-oauth2-oidc';
+import { OAuthEvent, OAuthService } from 'angular-oauth2-oidc';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { authConfig } from './auth-config';
 
@@ -11,18 +12,33 @@ export class AuthService {
   
   private readonly oauthDiscoveryUrl = environment.auth.oauthDiscoveryUrl;
 
-  constructor(private oauthService: OAuthService, private router: Router) { 
-    this.oauthService.configure(authConfig);
+  private isAuthenticatedSubject$ = new BehaviorSubject<boolean>(false);
+  isAuthenticated$ = this.isAuthenticatedSubject$.asObservable();
+
+  private oauthEventsSubscription: Subscription;
+
+  constructor(private oauth: OAuthService, private router: Router) { 
+    this.oauth.configure(authConfig);
+    this.oauthEventsSubscription = this.oauth.events
+      .subscribe(this.onOauthServiceEvent);
+  }
+
+  ngOnDestroy() {
+    this.oauthEventsSubscription.unsubscribe();
+  }
+
+  onOauthServiceEvent = (event: OAuthEvent) => {
+    this.isAuthenticatedSubject$.next(this.oauth.hasValidAccessToken());
   }
 
   async login() {
-    await this.oauthService.loadDiscoveryDocument(this.oauthDiscoveryUrl);
-    this.oauthService.initCodeFlow();
+    await this.oauth.loadDiscoveryDocument(this.oauthDiscoveryUrl);
+    this.oauth.initCodeFlow();
   }
 
   async proceedAuth() {
-    await this.oauthService.loadDiscoveryDocument(this.oauthDiscoveryUrl);
-    this.oauthService.tryLoginCodeFlow({
+    await this.oauth.loadDiscoveryDocument(this.oauthDiscoveryUrl);
+    this.oauth.tryLoginCodeFlow({
       onTokenReceived: () => {
         this.router.navigate(['/']);
       },
