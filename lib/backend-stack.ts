@@ -6,14 +6,14 @@ import * as cognito from '@aws-cdk/aws-cognito';
 
 export interface BackendStackProps extends cdk.StackProps {
   authDomainPrefix: string;
-  cloudfrontUrl: string;
+  cloudfrontDomain: string;
   httpApiId: string;
   httpApiEndpoint: string;
 }
 
 interface addRouteProps {
   id: string;
-  api: gateway.HttpApi;
+  api: gateway.IHttpApi;
   lambda: lambda.IFunction;
   method?: gateway.HttpMethod;
   path: string;
@@ -47,7 +47,7 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    const authCallbackUrl = props.cloudfrontUrl + '/login/callback';
+    const authCallbackUrl = `https://${props.cloudfrontDomain}/login/callback`;
 
     const authClient: cognito.UserPoolClient = new cognito.UserPoolClient(this, 'AuthClient', {
       userPool,
@@ -57,7 +57,7 @@ export class BackendStack extends cdk.Stack {
         },
         scopes: [cognito.OAuthScope.OPENID],
         callbackUrls: [authCallbackUrl],
-        logoutUrls: [props.cloudfrontUrl],
+        logoutUrls: [`https://${props.cloudfrontDomain}`],
       }
     });
 

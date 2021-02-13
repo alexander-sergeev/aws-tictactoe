@@ -8,7 +8,6 @@
     "@aws-cdk/aws-secretsmanager:parseOwnedSecretName": true,
     "@aws-cdk/aws-kms:defaultKeyPolicies": true,
     "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
-    "authDomainPrefix": "tictactoe-app-2021",
-    "cloudfrontUrl": "https://d1fb25xab60y2b.cloudfront.net"
+    "authDomainPrefix": "tictactoe-app-2021"
   }
 }

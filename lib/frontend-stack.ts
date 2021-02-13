@@ -9,6 +9,8 @@ export interface FrontendStackProps extends cdk.StackProps {
 }
 
 export class FrontendStack extends cdk.Stack {
+  readonly cloudfrontDomain: string;
+
   constructor(scope: cdk.Construct, id: string, props: FrontendStackProps) {
     super(scope, id, props);
 
@@ -20,15 +22,15 @@ export class FrontendStack extends cdk.Stack {
 
     bucket.grantRead(bucketOAI);
 
-    const bucketOriginProps: cfOrigins.S3OriginProps = { 
-      originAccessIdentity: bucketOAI 
+    const bucketOriginProps: cfOrigins.S3OriginProps = {
+      originAccessIdentity: bucketOAI
     };
 
     const defaultBehavior: cloudfront.BehaviorOptions = {
       origin: new cfOrigins.S3Origin(bucket, bucketOriginProps),
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
     };
-    
+
     const backendCachePolicy = new cloudfront.CachePolicy(this, 'BackendCachePolicy', {
       defaultTtl: cdk.Duration.seconds(0),
       headerBehavior: cloudfront.CacheHeaderBehavior.allowList('Authorization'),
@@ -38,7 +40,7 @@ export class FrontendStack extends cdk.Stack {
       origin: new cfOrigins.HttpOrigin(`${props.httpApiId}.execute-api.${this.region}.${this.urlSuffix}`),
       cachePolicy: backendCachePolicy,
     };
-    
+
     const errorResponses: cloudfront.ErrorResponse[] = [{
       httpStatus: 404,
       responsePagePath: '/index.html',
@@ -53,8 +55,10 @@ export class FrontendStack extends cdk.Stack {
       defaultRootObject: 'index.html',
       errorResponses,
     };
-    
+
     const distribution = new cloudfront.Distribution(this, 'Distribution', distributionConfig);
+
+    this.cloudfrontDomain = distribution.distributionDomainName;
 
     new s3deploy.BucketDeployment(this, 'Deploy', {
       sources: [s3deploy.Source.asset('./client/dist/client')],
