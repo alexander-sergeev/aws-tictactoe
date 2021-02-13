@@ -49,7 +49,6 @@ export class FrontendStack extends cdk.Stack {
       defaultBehavior,
       additionalBehaviors: {
         '/api/*': backendBehavior,
-        '/login': backendBehavior,
       },
       defaultRootObject: 'index.html',
       errorResponses,
