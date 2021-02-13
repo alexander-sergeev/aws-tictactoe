@@ -7,6 +7,8 @@ import * as cognito from '@aws-cdk/aws-cognito';
 export interface BackendStackProps extends cdk.StackProps {
   authDomainPrefix: string;
   cloudfrontUrl: string;
+  httpApiId: string;
+  httpApiEndpoint: string;
 }
 
 interface addRouteProps {
@@ -19,8 +21,7 @@ interface addRouteProps {
 }
 
 export class BackendStack extends cdk.Stack {
-  readonly httpApi: gateway.HttpApi;
-
+  
   constructor(scope: cdk.Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
 
@@ -60,7 +61,10 @@ export class BackendStack extends cdk.Stack {
       }
     });
 
-    const api = new gateway.HttpApi(this, 'Api');
+    const api = gateway.HttpApi.fromHttpApiAttributes(this, 'Api', {
+      httpApiId: props.httpApiId,
+      apiEndpoint: props.httpApiEndpoint,
+    });
 
     const authorizer = new gateway.CfnAuthorizer(this, 'ApiAuthorizer', {
       name: 'authorizer',
@@ -72,8 +76,6 @@ export class BackendStack extends cdk.Stack {
       },
       identitySource: ['$request.header.Authorization'],
     });
-
-    this.httpApi = api;
   }
 
   private addRoute(props: addRouteProps) {
