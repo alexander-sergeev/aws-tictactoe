@@ -2,13 +2,12 @@ import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as gateway from '@aws-cdk/aws-apigatewayv2';
 import * as apiIntegrations from '@aws-cdk/aws-apigatewayv2-integrations';
-import * as cognito from '@aws-cdk/aws-cognito';
 
 export interface BackendStackProps extends cdk.StackProps {
-  authDomainPrefix: string;
-  cloudfrontDomain: string;
   httpApiId: string;
   httpApiEndpoint: string;
+  userPoolProviderUrl: string;
+  userPoolClientId: string;
 }
 
 interface addRouteProps {
@@ -25,42 +24,6 @@ export class BackendStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
 
-    const authAutoConfirmUserLambda: lambda.Function = new lambda.Function(this, 'AuthAutoConfirmUserLambda', {
-      runtime: lambda.Runtime.NODEJS_12_X,
-      code: lambda.Code.fromAsset('dist/auth-auto-confirm-user'),
-      handler: 'index.handler',
-    });
-
-    const userPool: cognito.UserPool = new cognito.UserPool(this, 'UserPool', {
-      selfSignUpEnabled: true,
-      passwordPolicy: {
-        requireSymbols: false,
-      },
-      lambdaTriggers: {
-        preSignUp: authAutoConfirmUserLambda,
-      },
-    });
-
-    const authDomain = userPool.addDomain('AuthDomain', {
-      cognitoDomain: {
-        domainPrefix: props.authDomainPrefix,
-      },
-    });
-
-    const authCallbackUrl = `https://${props.cloudfrontDomain}/login/callback`;
-
-    const authClient: cognito.UserPoolClient = new cognito.UserPoolClient(this, 'AuthClient', {
-      userPool,
-      oAuth: {
-        flows: {
-          authorizationCodeGrant: true,
-        },
-        scopes: [cognito.OAuthScope.OPENID],
-        callbackUrls: [authCallbackUrl],
-        logoutUrls: [`https://${props.cloudfrontDomain}`],
-      }
-    });
-
     const api = gateway.HttpApi.fromHttpApiAttributes(this, 'Api', {
       httpApiId: props.httpApiId,
       apiEndpoint: props.httpApiEndpoint,
@@ -71,8 +34,8 @@ export class BackendStack extends cdk.Stack {
       apiId: api.httpApiId,
       authorizerType: 'JWT',
       jwtConfiguration: {
-        audience: [authClient.userPoolClientId],
-        issuer: userPool.userPoolProviderUrl,
+        audience: [props.userPoolClientId],
+        issuer: props.userPoolProviderUrl,
       },
       identitySource: ['$request.header.Authorization'],
     });
