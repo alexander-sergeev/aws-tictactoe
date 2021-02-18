@@ -10,6 +10,7 @@ const app = new cdk.App();
 const gateway = new GatewayStack(app, 'GatewayStack');
 const frontend = new FrontendStack(app, 'FrontendStack', {
   httpApiId: gateway.httpApi.httpApiId,
+  wsId: gateway.wsApi.ref,
 });
 const auth = new AuthStack(app, 'AuthStack', {
   authDomainPrefix: app.node.tryGetContext('authDomainPrefix'),
